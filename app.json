@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "DoneWithIt",
-    "slug": "DoneWithIt",
+    "name": "36",
+    "slug": "36",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -27,6 +27,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "description": "Combine 4 numbers to make 36."
   }
 }
