@@ -1,11 +1,12 @@
 // src/screens/StatsScreen.js
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
@@ -14,14 +15,37 @@ import { ProgressBar } from '../components';
 import { getProgress, getStats, getStreaks } from '../data/storage';
 import { DIFFICULTIES } from '../logic/difficultyConfig';
 
-function StatCard({ title, children, theme }) {
+function StatCard({ title, children, theme, index = 0 }) {
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 400,
+      delay: index * 100,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
   return (
-    <View
+    <Animated.View
       style={[
         styles.card,
         {
           backgroundColor: theme.colors.surface,
-          borderRadius: theme.borderRadius.lg,
+          borderRadius: theme.borderRadius.xl,
+          opacity: fadeAnim,
+          transform: [{
+            translateY: fadeAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [20, 0],
+            }),
+          }],
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: theme.name === 'dark' ? 0.3 : 0.1,
+          shadowRadius: 12,
+          elevation: 6,
         },
       ]}
     >
@@ -29,7 +53,7 @@ function StatCard({ title, children, theme }) {
         {title}
       </Text>
       {children}
-    </View>
+    </Animated.View>
   );
 }
 
@@ -196,10 +220,12 @@ export default function StatsScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
       >
         {/* Overview */}
-        <StatCard title="OVERVIEW" theme={theme}>
+        <StatCard title="OVERVIEW" theme={theme} index={0}>
           <View style={styles.overviewRow}>
             <View style={styles.overviewStat}>
-              <Text style={[styles.overviewIcon]}>&#x1F9E9;</Text>
+              <View style={[styles.overviewIconContainer, { backgroundColor: theme.colors.primary + '15' }]}>
+                <Text style={[styles.overviewIcon]}>&#x1F9E9;</Text>
+              </View>
               <Text style={[styles.overviewValue, { color: theme.colors.text }]}>
                 {overview.totalPuzzles}
               </Text>
@@ -207,8 +233,11 @@ export default function StatsScreen({ navigation }) {
                 Puzzles
               </Text>
             </View>
+            <View style={[styles.overviewDivider, { backgroundColor: theme.colors.textMuted + '20' }]} />
             <View style={styles.overviewStat}>
-              <Text style={[styles.overviewIcon]}>&#x1F525;</Text>
+              <View style={[styles.overviewIconContainer, { backgroundColor: theme.colors.secondary + '15' }]}>
+                <Text style={[styles.overviewIcon]}>&#x1F525;</Text>
+              </View>
               <Text style={[styles.overviewValue, { color: theme.colors.text }]}>
                 {overview.streak}
               </Text>
@@ -216,8 +245,11 @@ export default function StatsScreen({ navigation }) {
                 Days
               </Text>
             </View>
+            <View style={[styles.overviewDivider, { backgroundColor: theme.colors.textMuted + '20' }]} />
             <View style={styles.overviewStat}>
-              <Text style={[styles.overviewIcon]}>&#x2B50;</Text>
+              <View style={[styles.overviewIconContainer, { backgroundColor: theme.colors.easy + '15' }]}>
+                <Text style={[styles.overviewIcon]}>&#x2B50;</Text>
+              </View>
               <Text style={[styles.overviewValue, { color: theme.colors.text }]}>
                 {overview.totalStars}
               </Text>
@@ -229,27 +261,31 @@ export default function StatsScreen({ navigation }) {
         </StatCard>
 
         {/* Campaign Progress */}
-        <StatCard title="CAMPAIGN PROGRESS" theme={theme}>
+        <StatCard title="CAMPAIGN PROGRESS" theme={theme} index={1}>
           {renderDifficultyRow('easy', campaignProgress.easy)}
           {renderDifficultyRow('medium', campaignProgress.medium)}
           {renderDifficultyRow('hard', campaignProgress.hard)}
         </StatCard>
 
         {/* Endless Mode */}
-        <StatCard title="ENDLESS MODE" theme={theme}>
+        <StatCard title="ENDLESS MODE" theme={theme} index={2}>
           <View style={styles.endlessRow}>
             <View style={styles.endlessStat}>
-              <Text style={[styles.endlessValue, { color: theme.colors.primary }]}>
-                {endlessStats.bestRun}
-              </Text>
+              <View style={[styles.endlessValueContainer, { backgroundColor: theme.colors.primary + '15' }]}>
+                <Text style={[styles.endlessValue, { color: theme.colors.primary }]}>
+                  {endlessStats.bestRun}
+                </Text>
+              </View>
               <Text style={[styles.endlessLabel, { color: theme.colors.textMuted }]}>
                 Best Run
               </Text>
             </View>
             <View style={styles.endlessStat}>
-              <Text style={[styles.endlessValue, { color: theme.colors.text }]}>
-                {endlessStats.totalSolved}
-              </Text>
+              <View style={[styles.endlessValueContainer, { backgroundColor: theme.colors.textMuted + '15' }]}>
+                <Text style={[styles.endlessValue, { color: theme.colors.text }]}>
+                  {endlessStats.totalSolved}
+                </Text>
+              </View>
               <Text style={[styles.endlessLabel, { color: theme.colors.textMuted }]}>
                 Total Solved
               </Text>
@@ -258,28 +294,34 @@ export default function StatsScreen({ navigation }) {
         </StatCard>
 
         {/* Play Style */}
-        <StatCard title="PLAY STYLE" theme={theme}>
+        <StatCard title="PLAY STYLE" theme={theme} index={3}>
           <View style={styles.playStyleGrid}>
             <View style={styles.playStyleItem}>
-              <Text style={[styles.playStyleValue, { color: theme.colors.text }]}>
-                {playStyle.avgTime}s
-              </Text>
+              <View style={[styles.playStyleValueContainer, { backgroundColor: theme.colors.primary + '10' }]}>
+                <Text style={[styles.playStyleValue, { color: theme.colors.text }]}>
+                  {playStyle.avgTime}s
+                </Text>
+              </View>
               <Text style={[styles.playStyleLabel, { color: theme.colors.textMuted }]}>
                 Avg Time
               </Text>
             </View>
             <View style={styles.playStyleItem}>
-              <Text style={[styles.playStyleValue, { color: theme.colors.secondary }]}>
-                {playStyle.favoriteOp}
-              </Text>
+              <View style={[styles.playStyleValueContainer, { backgroundColor: theme.colors.secondary + '10' }]}>
+                <Text style={[styles.playStyleValue, { color: theme.colors.secondary }]}>
+                  {playStyle.favoriteOp}
+                </Text>
+              </View>
               <Text style={[styles.playStyleLabel, { color: theme.colors.textMuted }]}>
                 Favorite ({playStyle.favoriteOpPercent}%)
               </Text>
             </View>
             <View style={styles.playStyleItem}>
-              <Text style={[styles.playStyleValue, { color: theme.colors.success }]}>
-                {playStyle.perfectSolves}
-              </Text>
+              <View style={[styles.playStyleValueContainer, { backgroundColor: theme.colors.success + '10' }]}>
+                <Text style={[styles.playStyleValue, { color: theme.colors.success }]}>
+                  {playStyle.perfectSolves}
+                </Text>
+              </View>
               <Text style={[styles.playStyleLabel, { color: theme.colors.textMuted }]}>
                 Perfect Solves
               </Text>
@@ -294,14 +336,14 @@ export default function StatsScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 60,
+    paddingTop: 56,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    marginBottom: 24,
+    paddingHorizontal: 20,
+    marginBottom: 28,
   },
   backButton: {
     width: 44,
@@ -311,66 +353,86 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   backIcon: {
-    fontSize: 24,
+    fontSize: 22,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   placeholder: {
     width: 44,
   },
   content: {
-    paddingHorizontal: 24,
-    paddingBottom: 32,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
   card: {
-    padding: 20,
-    marginBottom: 16,
+    padding: 24,
+    marginBottom: 20,
   },
   cardTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    letterSpacing: 1,
-    marginBottom: 16,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.5,
+    marginBottom: 20,
   },
   overviewRow: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   overviewStat: {
     alignItems: 'center',
+    flex: 1,
+  },
+  overviewIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
   },
   overviewIcon: {
-    fontSize: 28,
-    marginBottom: 8,
+    fontSize: 26,
   },
   overviewValue: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 32,
+    fontWeight: '800',
   },
   overviewLabel: {
-    fontSize: 12,
+    fontSize: 11,
+    fontWeight: '600',
     marginTop: 4,
+    letterSpacing: 0.5,
+  },
+  overviewDivider: {
+    width: 1,
+    height: 80,
   },
   difficultyRow: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   difficultyHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    alignItems: 'center',
+    marginBottom: 10,
   },
   difficultyName: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
   difficultyProgress: {
     fontSize: 14,
+    fontWeight: '600',
   },
   starsText: {
     fontSize: 12,
-    marginTop: 4,
+    fontWeight: '600',
+    marginTop: 8,
     textAlign: 'right',
   },
   endlessRow: {
@@ -379,30 +441,49 @@ const styles = StyleSheet.create({
   },
   endlessStat: {
     alignItems: 'center',
+    flex: 1,
+  },
+  endlessValueContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
   },
   endlessValue: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontWeight: '800',
   },
   endlessLabel: {
-    fontSize: 14,
-    marginTop: 4,
+    fontSize: 13,
+    fontWeight: '600',
+    letterSpacing: 0.3,
   },
   playStyleGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
   },
   playStyleItem: {
     alignItems: 'center',
     flex: 1,
   },
+  playStyleValueContainer: {
+    width: 72,
+    height: 72,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
   playStyleValue: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: '800',
   },
   playStyleLabel: {
-    fontSize: 12,
-    marginTop: 4,
+    fontSize: 11,
+    fontWeight: '600',
     textAlign: 'center',
+    letterSpacing: 0.3,
   },
 });

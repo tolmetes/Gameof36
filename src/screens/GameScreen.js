@@ -248,142 +248,148 @@ export default function GameScreen({ navigation, route }) {
         </View>
       </View>
 
-      {/* Target Display */}
-      <View style={styles.targetContainer}>
-        <Text style={[styles.targetLabel, { color: theme.colors.textMuted }]}>
-          Target
-        </Text>
-        <View
-          style={[
-            styles.targetBox,
-            {
-              backgroundColor: theme.colors.surface,
-              borderRadius: theme.borderRadius.lg,
-            },
-          ]}
-        >
-          <Text style={[styles.targetNumber, { color: theme.colors.success }]}>
-            {TARGET_NUMBER}
+      {/* Display Section - Target and Current Result side by side */}
+      <View style={styles.displaySection}>
+        {/* Target Display */}
+        <View style={styles.displayCard}>
+          <Text style={[styles.displayLabel, { color: theme.colors.textMuted }]}>
+            TARGET
           </Text>
-        </View>
-      </View>
-
-      {/* Current Result */}
-      <TouchableOpacity
-        style={styles.resultContainer}
-        onPress={handleUndo}
-        disabled={history.length === 0}
-        activeOpacity={0.7}
-      >
-        <Text style={[styles.resultLabel, { color: theme.colors.textMuted }]}>
-          {currentResult !== null ? 'Current (tap to undo)' : 'Start combining'}
-        </Text>
-        <Animated.View
-          style={[
-            styles.resultBox,
-            {
-              backgroundColor: theme.colors.surface,
-              borderRadius: theme.borderRadius.lg,
-              transform: [{ scale: resultAnim }],
-              borderWidth: currentResult === TARGET_NUMBER ? 2 : 0,
-              borderColor: theme.colors.success,
-            },
-          ]}
-        >
-          <Text
+          <View
             style={[
-              styles.resultNumber,
+              styles.displayBox,
               {
-                color:
-                  currentResult === TARGET_NUMBER
-                    ? theme.colors.success
-                    : theme.colors.primary,
+                backgroundColor: theme.colors.surface,
+                borderRadius: theme.borderRadius.xl,
               },
             ]}
           >
-            {currentResult !== null ? currentResult : '?'}
-          </Text>
-        </Animated.View>
-      </TouchableOpacity>
+            <Text style={[styles.displayNumber, { color: theme.colors.success }]}>
+              {TARGET_NUMBER}
+            </Text>
+          </View>
+        </View>
 
-      {/* Numbers */}
-      <View style={styles.numbersContainer}>
-        {numbers.map((num, index) => (
-          <NumberCard
-            key={index}
-            value={num}
-            onPress={() => handleNumberPress(index)}
-            selected={selectedNumberIndex === index}
-            hidden={hiddenIndices.has(index)}
-            disabled={isWin}
-          />
-        ))}
-      </View>
+        {/* Divider */}
+        <View style={styles.displayDivider}>
+          <Text style={[styles.dividerText, { color: theme.colors.textMuted }]}>→</Text>
+        </View>
 
-      {/* Operators */}
-      <View style={styles.operatorsContainer}>
-        {OPERATORS.map((op) => (
-          <OperatorButton
-            key={op}
-            operator={op}
-            onPress={handleOperatorPress}
-            selected={selectedOperator === op}
-            disabled={
-              selectedNumberIndex === null ||
-              !config.operators.includes(op) ||
-              isWin
-            }
-          />
-        ))}
-      </View>
-
-      {/* Action Bar */}
-      <View style={styles.actionBar}>
+        {/* Current Result */}
         <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: theme.colors.surface }]}
-          onPress={handleHome}
+          style={styles.displayCard}
+          onPress={handleUndo}
+          disabled={history.length === 0}
+          activeOpacity={0.7}
         >
-          <Text style={[styles.actionIcon, { color: theme.colors.textMuted }]}>
-            &#x1F3E0;
+          <Text style={[styles.displayLabel, { color: theme.colors.textMuted }]}>
+            {history.length > 0 ? 'TAP TO UNDO' : 'CURRENT'}
           </Text>
-          <Text style={[styles.actionLabel, { color: theme.colors.textMuted }]}>
-            Home
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: theme.colors.surface }]}
-          onPress={handleReset}
-        >
-          <Text style={[styles.actionIcon, { color: theme.colors.textMuted }]}>
-            &#x21BB;
-          </Text>
-          <Text style={[styles.actionLabel, { color: theme.colors.textMuted }]}>
-            Reset
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: theme.colors.surface }]}
-          onPress={() => {
-            // Hint feature placeholder
-            console.log('Hint requested');
-          }}
-        >
-          <Text style={[styles.actionIcon, { color: theme.colors.secondary }]}>
-            &#x1F4A1;
-          </Text>
-          <Text style={[styles.actionLabel, { color: theme.colors.textMuted }]}>
-            Hint
-          </Text>
+          <Animated.View
+            style={[
+              styles.displayBox,
+              {
+                backgroundColor: theme.colors.surface,
+                borderRadius: theme.borderRadius.xl,
+                transform: [{ scale: resultAnim }],
+                borderWidth: currentResult === TARGET_NUMBER ? 3 : 0,
+                borderColor: theme.colors.success,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.displayNumber,
+                {
+                  color:
+                    currentResult === TARGET_NUMBER
+                      ? theme.colors.success
+                      : currentResult !== null
+                        ? theme.colors.primary
+                        : theme.colors.textMuted,
+                },
+              ]}
+            >
+              {currentResult !== null ? currentResult : '—'}
+            </Text>
+          </Animated.View>
         </TouchableOpacity>
       </View>
 
-      {/* Moves Counter */}
-      <View style={styles.movesContainer}>
-        <Text style={[styles.movesText, { color: theme.colors.textMuted }]}>
-          Moves: {moves}
-        </Text>
+      {/* Game Board Container */}
+      <View style={[styles.gameBoard, { backgroundColor: theme.colors.surface + '40' }]}>
+        {/* Numbers Grid */}
+        <View style={styles.numbersContainer}>
+          {numbers.map((num, index) => (
+            <NumberCard
+              key={index}
+              value={num}
+              onPress={() => handleNumberPress(index)}
+              selected={selectedNumberIndex === index}
+              hidden={hiddenIndices.has(index)}
+              disabled={isWin}
+            />
+          ))}
+        </View>
+
+        {/* Operators Row */}
+        <View style={styles.operatorsContainer}>
+          {OPERATORS.map((op) => (
+            <OperatorButton
+              key={op}
+              operator={op}
+              onPress={handleOperatorPress}
+              selected={selectedOperator === op}
+              disabled={
+                selectedNumberIndex === null ||
+                !config.operators.includes(op) ||
+                isWin
+              }
+            />
+          ))}
+        </View>
+      </View>
+
+      {/* Bottom Section */}
+      <View style={styles.bottomSection}>
+        {/* Moves Counter - More prominent */}
+        <View style={[styles.movesContainer, { backgroundColor: theme.colors.surface }]}>
+          <Text style={[styles.movesLabel, { color: theme.colors.textMuted }]}>MOVES</Text>
+          <Text style={[styles.movesValue, { color: accentColor }]}>{moves}</Text>
+        </View>
+
+        {/* Action Buttons */}
+        <View style={styles.actionBar}>
+          <TouchableOpacity
+            style={[styles.actionButton, { backgroundColor: theme.colors.surface }]}
+            onPress={handleHome}
+          >
+            <Text style={[styles.actionIcon, { color: theme.colors.textMuted }]}>
+              &#x2190;
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.actionButton, styles.actionButtonLarge, { backgroundColor: accentColor + '20', borderColor: accentColor }]}
+            onPress={handleReset}
+          >
+            <Text style={[styles.actionIcon, { color: accentColor }]}>
+              &#x21BB;
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.actionButton, { backgroundColor: theme.colors.surface }]}
+            onPress={() => {
+              // Hint feature placeholder
+              console.log('Hint requested');
+            }}
+          >
+            <Text style={[styles.actionIcon, { color: theme.colors.secondary }]}>
+              ?
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </LinearGradient>
   );
@@ -392,14 +398,14 @@ export default function GameScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 60,
+    paddingTop: 56,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    marginBottom: 16,
+    paddingHorizontal: 20,
+    marginBottom: 20,
   },
   backButton: {
     width: 44,
@@ -409,92 +415,124 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   backIcon: {
-    fontSize: 24,
+    fontSize: 22,
   },
   levelInfo: {
     alignItems: 'center',
   },
   levelText: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   difficultyText: {
-    fontSize: 14,
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginTop: 2,
   },
   bestStars: {
     width: 80,
     alignItems: 'flex-end',
   },
-  targetContainer: {
+  // New display section styles
+  displaySection: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
-  },
-  targetLabel: {
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  targetBox: {
     paddingHorizontal: 24,
-    paddingVertical: 8,
-  },
-  targetNumber: {
-    fontSize: 32,
-    fontWeight: 'bold',
-  },
-  resultContainer: {
-    alignItems: 'center',
     marginBottom: 24,
   },
-  resultLabel: {
-    fontSize: 12,
+  displayCard: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  displayLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.5,
     marginBottom: 8,
   },
-  resultBox: {
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    minWidth: 120,
+  displayBox: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    minWidth: 80,
     alignItems: 'center',
   },
-  resultNumber: {
-    fontSize: 48,
-    fontWeight: 'bold',
+  displayNumber: {
+    fontSize: 36,
+    fontWeight: '800',
+  },
+  displayDivider: {
+    paddingHorizontal: 16,
+  },
+  dividerText: {
+    fontSize: 24,
+    opacity: 0.5,
+  },
+  // Game board container
+  gameBoard: {
+    marginHorizontal: 16,
+    borderRadius: 24,
+    paddingVertical: 24,
+    paddingHorizontal: 8,
+    marginBottom: 20,
   },
   numbersContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     flexWrap: 'wrap',
-    paddingHorizontal: 16,
-    marginBottom: 24,
+    marginBottom: 20,
   },
   operatorsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 32,
+  },
+  // Bottom section
+  bottomSection: {
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  movesContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginBottom: 16,
+  },
+  movesLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1,
+    marginRight: 8,
+  },
+  movesValue: {
+    fontSize: 18,
+    fontWeight: '800',
   },
   actionBar: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 16,
-    paddingHorizontal: 24,
-    marginBottom: 16,
+    alignItems: 'center',
+    gap: 12,
   },
   actionButton: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    minWidth: 80,
+  },
+  actionButtonLarge: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 2,
   },
   actionIcon: {
-    fontSize: 24,
-    marginBottom: 4,
-  },
-  actionLabel: {
-    fontSize: 12,
-  },
-  movesContainer: {
-    alignItems: 'center',
-  },
-  movesText: {
-    fontSize: 14,
+    fontSize: 22,
+    fontWeight: '600',
   },
 });

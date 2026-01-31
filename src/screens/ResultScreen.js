@@ -89,7 +89,7 @@ export default function ResultScreen({ navigation, route }) {
 
   return (
     <LinearGradient colors={theme.colors.background} style={styles.container}>
-      {/* Success Icon */}
+      {/* Success Animation */}
       <Animated.View
         style={[
           styles.successContainer,
@@ -99,40 +99,51 @@ export default function ResultScreen({ navigation, route }) {
           },
         ]}
       >
+        {/* Decorative circles */}
+        <View style={[styles.decorCircle, styles.decorCircle1, { borderColor: theme.colors.success + '30' }]} />
+        <View style={[styles.decorCircle, styles.decorCircle2, { borderColor: theme.colors.success + '20' }]} />
+
         <View
           style={[
             styles.checkCircle,
             {
-              backgroundColor: theme.colors.success + '20',
+              backgroundColor: theme.colors.success + '15',
               borderColor: theme.colors.success,
             },
           ]}
         >
-          <Text style={[styles.checkmark, { color: theme.colors.success }]}>
-            &#x2713;
+          <Text style={[styles.targetNumber, { color: theme.colors.success }]}>
+            36
           </Text>
         </View>
-        <Text style={[styles.targetNumber, { color: theme.colors.success }]}>
-          36
-        </Text>
       </Animated.View>
 
-      {/* Stars */}
-      <Animated.View style={[styles.starsContainer, { opacity: fadeAnim }]}>
+      {/* Stars Section */}
+      <Animated.View style={[styles.starsSection, { opacity: fadeAnim }]}>
         <StarRating stars={stars} size="large" animated />
         <Text style={[styles.message, { color: theme.colors.text }]}>
           {message}
         </Text>
+        <View style={[styles.levelBadge, { backgroundColor: accentColor + '20' }]}>
+          <Text style={[styles.levelBadgeText, { color: accentColor }]}>
+            Level {level} • {config.name}
+          </Text>
+        </View>
       </Animated.View>
 
-      {/* Stats */}
+      {/* Stats Card */}
       <Animated.View style={[styles.statsContainer, { opacity: fadeAnim }]}>
         <View
           style={[
             styles.statsCard,
             {
               backgroundColor: theme.colors.surface,
-              borderRadius: theme.borderRadius.lg,
+              borderRadius: theme.borderRadius.xl,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.1,
+              shadowRadius: 12,
+              elevation: 6,
             },
           ]}
         >
@@ -142,44 +153,50 @@ export default function ResultScreen({ navigation, route }) {
                 {moves}
               </Text>
               <Text style={[styles.statLabel, { color: theme.colors.textMuted }]}>
-                Moves
+                MOVES
               </Text>
             </View>
-            <View style={styles.statDivider} />
+            <View style={[styles.statDivider, { backgroundColor: theme.colors.textMuted + '30' }]} />
             <View style={styles.stat}>
               <Text style={[styles.statValue, { color: theme.colors.text }]}>
                 {time}s
               </Text>
               <Text style={[styles.statLabel, { color: theme.colors.textMuted }]}>
-                Time
+                TIME
               </Text>
             </View>
-            <View style={styles.statDivider} />
+            <View style={[styles.statDivider, { backgroundColor: theme.colors.textMuted + '30' }]} />
             <View style={styles.stat}>
               <Text style={[styles.statValue, { color: accentColor }]}>
                 {optimalMoves}
               </Text>
               <Text style={[styles.statLabel, { color: theme.colors.textMuted }]}>
-                Optimal
+                OPTIMAL
               </Text>
             </View>
           </View>
         </View>
       </Animated.View>
 
-      {/* Streak */}
+      {/* Streak Badge */}
       {streak > 1 && (
-        <Animated.View style={[styles.streakContainer, { opacity: fadeAnim }]}>
-          <Text style={[styles.streakIcon, { color: theme.colors.secondary }]}>
-            &#x1F525;
-          </Text>
-          <Text style={[styles.streakText, { color: theme.colors.text }]}>
-            {streak} solve streak
+        <Animated.View
+          style={[
+            styles.streakContainer,
+            {
+              opacity: fadeAnim,
+              backgroundColor: theme.colors.secondary + '15',
+            },
+          ]}
+        >
+          <Text style={[styles.streakIcon]}>🔥</Text>
+          <Text style={[styles.streakText, { color: theme.colors.secondary }]}>
+            {streak} in a row!
           </Text>
         </Animated.View>
       )}
 
-      {/* Buttons */}
+      {/* Action Buttons */}
       <Animated.View style={[styles.buttons, { opacity: fadeAnim }]}>
         <Button
           title="Home"
@@ -189,7 +206,7 @@ export default function ResultScreen({ navigation, route }) {
         />
         <View style={styles.buttonSpacer} />
         <Button
-          title={level < config.totalLevels ? 'Next Level' : 'Complete!'}
+          title={level < config.totalLevels ? 'Next →' : 'Complete!'}
           onPress={handleNext}
           variant="primary"
           size="large"
@@ -208,39 +225,62 @@ const styles = StyleSheet.create({
   },
   successContainer: {
     alignItems: 'center',
-    marginBottom: 24,
+    justifyContent: 'center',
+    marginBottom: 28,
+  },
+  decorCircle: {
+    position: 'absolute',
+    borderRadius: 1000,
+    borderWidth: 2,
+  },
+  decorCircle1: {
+    width: 140,
+    height: 140,
+  },
+  decorCircle2: {
+    width: 180,
+    height: 180,
   },
   checkCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 3,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 4,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
-  },
-  checkmark: {
-    fontSize: 40,
   },
   targetNumber: {
-    fontSize: 48,
-    fontWeight: 'bold',
+    fontSize: 44,
+    fontWeight: '800',
+    letterSpacing: -1,
   },
-  starsContainer: {
+  starsSection: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 28,
   },
   message: {
-    fontSize: 24,
-    fontWeight: '600',
+    fontSize: 26,
+    fontWeight: '700',
+    marginTop: 14,
+    letterSpacing: 0.5,
+  },
+  levelBadge: {
     marginTop: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  levelBadgeText: {
+    fontSize: 13,
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   statsContainer: {
     width: '100%',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   statsCard: {
-    padding: 20,
+    padding: 24,
   },
   statRow: {
     flexDirection: 'row',
@@ -252,36 +292,40 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statValue: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 30,
+    fontWeight: '800',
   },
   statLabel: {
-    fontSize: 14,
-    marginTop: 4,
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 1,
+    marginTop: 6,
   },
   statDivider: {
     width: 1,
-    height: 40,
-    backgroundColor: '#333',
+    height: 44,
   },
   streakContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 28,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
   },
   streakIcon: {
-    fontSize: 24,
+    fontSize: 20,
     marginRight: 8,
   },
   streakText: {
-    fontSize: 18,
-    fontWeight: '500',
+    fontSize: 16,
+    fontWeight: '700',
   },
   buttons: {
     flexDirection: 'row',
     width: '100%',
   },
   buttonSpacer: {
-    width: 16,
+    width: 14,
   },
 });

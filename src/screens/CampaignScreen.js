@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
@@ -16,71 +17,124 @@ import { ProgressBar } from '../components';
 
 const WORLDS = ['easy', 'medium', 'hard'];
 
-function WorldCard({ difficulty, progress, stars, isLocked, onPress, theme }) {
+function WorldCard({ difficulty, progress, stars, isLocked, onPress, theme, index }) {
   const config = DIFFICULTIES[difficulty];
   const color = theme.colors[config.color];
+  const maxStars = config.totalLevels * 3;
+  const percentage = Math.round((progress / config.totalLevels) * 100);
+
+  const scaleAnim = React.useRef(new Animated.Value(1)).current;
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 400,
+      delay: index * 120,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  const handlePressIn = () => {
+    if (!isLocked) {
+      Animated.spring(scaleAnim, { toValue: 0.98, useNativeDriver: true }).start();
+    }
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, { toValue: 1, friction: 3, useNativeDriver: true }).start();
+  };
 
   return (
-    <TouchableOpacity
-      style={[
-        styles.worldCard,
-        {
-          backgroundColor: theme.colors.surface,
-          borderRadius: theme.borderRadius.lg,
-          opacity: isLocked ? 0.6 : 1,
-        },
-      ]}
-      onPress={onPress}
-      disabled={isLocked}
-      activeOpacity={0.8}
-    >
-      <View style={styles.worldHeader}>
-        <View style={[styles.worldBadge, { backgroundColor: color + '20' }]}>
-          <Text style={[styles.worldBadgeText, { color }]}>
-            {config.name.charAt(0)}
-          </Text>
-        </View>
-        <View style={styles.worldInfo}>
-          <Text style={[styles.worldTitle, { color: theme.colors.text }]}>
-            {config.name}
-          </Text>
-          <Text style={[styles.worldSubtitle, { color: theme.colors.textMuted }]}>
-            {progress}/{config.totalLevels} levels
-          </Text>
-        </View>
-        {isLocked ? (
-          <View style={styles.lockContainer}>
-            <Text style={[styles.lockIcon, { color: theme.colors.textMuted }]}>
-              &#x1F512;
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.starsContainer}>
-            <Text style={[styles.starIcon, { color: theme.colors.secondary }]}>
-              &#x2B50;
-            </Text>
-            <Text style={[styles.starsText, { color: theme.colors.textMuted }]}>
-              {stars}
-            </Text>
-          </View>
-        )}
-      </View>
+    <Animated.View style={{ opacity: fadeAnim, transform: [{ scale: scaleAnim }] }}>
+      <TouchableOpacity
+        style={[
+          styles.worldCard,
+          {
+            backgroundColor: theme.colors.surface,
+            borderRadius: theme.borderRadius.xl,
+            opacity: isLocked ? 0.5 : 1,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: theme.name === 'dark' ? 0.3 : 0.1,
+            shadowRadius: 12,
+            elevation: 6,
+          },
+        ]}
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        disabled={isLocked}
+        activeOpacity={1}
+      >
+        {/* Color accent bar */}
+        <View style={[styles.worldAccent, { backgroundColor: color }]} />
 
-      <View style={styles.worldProgress}>
-        <ProgressBar
-          current={progress}
-          total={config.totalLevels}
-          color={color}
-          animated={false}
-        />
-      </View>
+        <View style={styles.worldContent}>
+          {/* Header row */}
+          <View style={styles.worldHeader}>
+            <View style={[styles.worldBadge, { backgroundColor: color + '18' }]}>
+              <Text style={[styles.worldBadgeText, { color }]}>
+                {difficulty === 'easy' ? '★' : difficulty === 'medium' ? '★★' : '★★★'}
+              </Text>
+            </View>
 
-      {isLocked && (
-        <Text style={[styles.unlockHint, { color: theme.colors.textMuted }]}>
-          Complete more levels to unlock
-        </Text>
-      )}
-    </TouchableOpacity>
+            <View style={styles.worldInfo}>
+              <Text style={[styles.worldTitle, { color: theme.colors.text }]}>
+                {config.name}
+              </Text>
+              <Text style={[styles.worldOperators, { color: theme.colors.textMuted }]}>
+                {config.operators.map(op => op === '*' ? '×' : op === '/' ? '÷' : op).join('  ')}
+              </Text>
+            </View>
+
+            {isLocked ? (
+              <View style={[styles.lockBadge, { backgroundColor: theme.colors.textMuted + '20' }]}>
+                <Text style={[styles.lockIcon, { color: theme.colors.textMuted }]}>
+                  &#x1F512;
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.percentBadge}>
+                <Text style={[styles.percentText, { color }]}>
+                  {percentage}%
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {/* Progress Section */}
+          <View style={styles.progressSection}>
+            <ProgressBar
+              current={progress}
+              total={config.totalLevels}
+              color={color}
+              animated={false}
+            />
+
+            <View style={styles.statsRow}>
+              <View style={styles.statItem}>
+                <Text style={[styles.statValue, { color: theme.colors.text }]}>{progress}</Text>
+                <Text style={[styles.statLabel, { color: theme.colors.textMuted }]}>/{config.totalLevels} levels</Text>
+              </View>
+
+              <View style={styles.statItem}>
+                <Text style={[styles.statValue, { color: theme.colors.secondary }]}>★ {stars}</Text>
+                <Text style={[styles.statLabel, { color: theme.colors.textMuted }]}>/{maxStars}</Text>
+              </View>
+            </View>
+          </View>
+
+          {isLocked && (
+            <View style={[styles.unlockHintContainer, { backgroundColor: theme.colors.textMuted + '10' }]}>
+              <Text style={[styles.unlockHint, { color: theme.colors.textMuted }]}>
+                Complete 16 levels to unlock
+              </Text>
+            </View>
+          )}
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
   );
 }
 
@@ -146,7 +200,7 @@ export default function CampaignScreen({ navigation }) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {WORLDS.map((difficulty) => (
+        {WORLDS.map((difficulty, index) => (
           <WorldCard
             key={difficulty}
             difficulty={difficulty}
@@ -157,6 +211,7 @@ export default function CampaignScreen({ navigation }) {
               navigation.navigate('LevelSelect', { difficulty })
             }
             theme={theme}
+            index={index}
           />
         ))}
       </ScrollView>
@@ -167,14 +222,14 @@ export default function CampaignScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 60,
+    paddingTop: 56,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    marginBottom: 24,
+    paddingHorizontal: 20,
+    marginBottom: 32,
   },
   backButton: {
     width: 44,
@@ -184,75 +239,110 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   backIcon: {
-    fontSize: 24,
+    fontSize: 22,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   placeholder: {
     width: 44,
   },
   content: {
-    paddingHorizontal: 24,
-    paddingBottom: 32,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
   worldCard: {
+    marginBottom: 20,
+    overflow: 'hidden',
+    flexDirection: 'row',
+  },
+  worldAccent: {
+    width: 5,
+  },
+  worldContent: {
+    flex: 1,
     padding: 20,
-    marginBottom: 16,
   },
   worldHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   worldBadge: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
+    width: 52,
+    height: 52,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 14,
   },
   worldBadgeText: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 16,
+    letterSpacing: -2,
   },
   worldInfo: {
     flex: 1,
   },
   worldTitle: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
-  worldSubtitle: {
+  worldOperators: {
     fontSize: 14,
-    marginTop: 2,
+    marginTop: 4,
+    fontWeight: '500',
+    letterSpacing: 2,
   },
-  lockContainer: {
-    padding: 8,
-  },
-  lockIcon: {
-    fontSize: 24,
-  },
-  starsContainer: {
-    flexDirection: 'row',
+  lockBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  starIcon: {
+  lockIcon: {
     fontSize: 18,
-    marginRight: 4,
   },
-  starsText: {
+  percentBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  percentText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
-  worldProgress: {
-    marginTop: 8,
+  progressSection: {
+    marginTop: 4,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+  },
+  statItem: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  statValue: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  statLabel: {
+    fontSize: 13,
+    marginLeft: 2,
+  },
+  unlockHintContainer: {
+    marginTop: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 10,
   },
   unlockHint: {
     fontSize: 12,
-    marginTop: 12,
+    fontWeight: '500',
     textAlign: 'center',
   },
 });
