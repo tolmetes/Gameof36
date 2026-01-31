@@ -1,21 +1,13 @@
 import React from 'react';
-import { Dimensions, StyleSheet, Platform, StatusBar, Text, View } from 'react-native';
-
-import Home from './Home'
+import { StatusBar } from 'expo-status-bar';
+import { ThemeProvider } from './src/themes/ThemeContext';
+import { AppNavigator } from './src/navigation/AppNavigator';
 
 export default function App() {
   return (
-    <View style={styles.container} >
-      <Home />
-    </View >
+    <ThemeProvider>
+      <StatusBar style="light" />
+      <AppNavigator />
+    </ThemeProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#9474cc',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
