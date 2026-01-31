@@ -30,9 +30,9 @@ export function NumberCard({
   };
 
   const sizeStyles = {
-    large: { width: 80, height: 80, fontSize: theme.typography.sizes.xxl },
-    medium: { width: 64, height: 64, fontSize: theme.typography.sizes.xl },
-    small: { width: 48, height: 48, fontSize: theme.typography.sizes.lg },
+    large: { width: 72, height: 72, fontSize: theme.typography.sizes.xxl },
+    medium: { width: 56, height: 56, fontSize: theme.typography.sizes.xl },
+    small: { width: 44, height: 44, fontSize: theme.typography.sizes.lg },
   };
 
   const { width, height, fontSize } = sizeStyles[size];
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   card: {
     justifyContent: 'center',
     alignItems: 'center',
-    margin: 8,
+    margin: 6,
   },
   number: {
     fontWeight: 'bold',

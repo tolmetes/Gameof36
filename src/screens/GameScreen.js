@@ -473,16 +473,16 @@ const styles = StyleSheet.create({
   },
   // Game board container
   gameBoard: {
-    marginHorizontal: 16,
+    marginHorizontal: 12,
     borderRadius: 24,
-    paddingVertical: 24,
-    paddingHorizontal: 8,
+    paddingVertical: 20,
+    paddingHorizontal: 4,
     marginBottom: 20,
   },
   numbersContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    flexWrap: 'wrap',
+    alignItems: 'center',
     marginBottom: 20,
   },
   operatorsContainer: {
