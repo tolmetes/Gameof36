@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
+import { ChevronLeft, Puzzle, Flame, Star } from 'lucide-react-native';
 import { useTheme } from '../themes/ThemeContext';
 import { ProgressBar } from '../components';
 import { getProgress, getStats, getStreaks } from '../data/storage';
@@ -207,9 +208,7 @@ export default function StatsScreen({ navigation }) {
           style={[styles.backButton, { backgroundColor: theme.colors.surface }]}
           onPress={() => navigation.goBack()}
         >
-          <Text style={[styles.backIcon, { color: theme.colors.text }]}>
-            &#x2190;
-          </Text>
+          <ChevronLeft size={22} color={theme.colors.text} strokeWidth={2.5} />
         </TouchableOpacity>
         <Text style={[styles.title, { color: theme.colors.text }]}>Stats</Text>
         <View style={styles.placeholder} />
@@ -224,7 +223,7 @@ export default function StatsScreen({ navigation }) {
           <View style={styles.overviewRow}>
             <View style={styles.overviewStat}>
               <View style={[styles.overviewIconContainer, { backgroundColor: theme.colors.primary + '15' }]}>
-                <Text style={[styles.overviewIcon]}>&#x1F9E9;</Text>
+                <Puzzle size={20} color={theme.colors.primary} strokeWidth={2} />
               </View>
               <Text style={[styles.overviewValue, { color: theme.colors.text }]}>
                 {overview.totalPuzzles}
@@ -236,7 +235,7 @@ export default function StatsScreen({ navigation }) {
             <View style={[styles.overviewDivider, { backgroundColor: theme.colors.textMuted + '20' }]} />
             <View style={styles.overviewStat}>
               <View style={[styles.overviewIconContainer, { backgroundColor: theme.colors.secondary + '15' }]}>
-                <Text style={[styles.overviewIcon]}>&#x1F525;</Text>
+                <Flame size={20} color={theme.colors.secondary} strokeWidth={2} />
               </View>
               <Text style={[styles.overviewValue, { color: theme.colors.text }]}>
                 {overview.streak}
@@ -248,7 +247,7 @@ export default function StatsScreen({ navigation }) {
             <View style={[styles.overviewDivider, { backgroundColor: theme.colors.textMuted + '20' }]} />
             <View style={styles.overviewStat}>
               <View style={[styles.overviewIconContainer, { backgroundColor: theme.colors.easy + '15' }]}>
-                <Text style={[styles.overviewIcon]}>&#x2B50;</Text>
+                <Star size={20} color={theme.colors.easy} strokeWidth={2} fill={theme.colors.easy} />
               </View>
               <Text style={[styles.overviewValue, { color: theme.colors.text }]}>
                 {overview.totalStars}
@@ -351,9 +350,6 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  backIcon: {
-    fontSize: 22,
   },
   title: {
     fontSize: 22,

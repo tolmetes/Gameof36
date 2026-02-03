@@ -1,45 +1,158 @@
 // src/screens/TutorialScreen.js
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Animated,
+  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import {
+  Pointer,
+  Calculator,
+  Merge,
+  Sparkles,
+  ChevronRight,
+  X,
+  CheckCircle2,
+  Target,
+} from 'lucide-react-native';
 import { useTheme } from '../themes/ThemeContext';
 import { NumberCard, OperatorButton, Button } from '../components';
 import { updateSettings } from '../data/storage';
 import { TARGET_NUMBER } from '../logic/difficultyConfig';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
 const TUTORIAL_NUMBERS = [9, 9, 9, 9];
 
 const STEPS = [
   {
-    prompt: 'Tap a number to select it',
+    title: 'Select a Number',
+    prompt: 'Tap any number card to begin',
+    icon: Pointer,
     highlightType: 'number',
-    highlightIndex: null, // Any number
+    highlightIndex: null,
   },
   {
-    prompt: 'Great! Now pick an operator',
+    title: 'Choose Operation',
+    prompt: 'Pick + to add the numbers',
+    icon: Calculator,
     highlightType: 'operator',
     highlightValue: '+',
   },
   {
-    prompt: 'Tap another number to combine',
+    title: 'Combine Numbers',
+    prompt: 'Now tap another 9 to add them',
+    icon: Merge,
     highlightType: 'number',
-    highlightIndex: null, // Any non-selected number
+    highlightIndex: null,
   },
   {
-    prompt: 'You made 18! Keep going to reach 36...',
+    title: 'Keep Going!',
+    prompt: 'Great! Reach 36 to complete the puzzle',
+    icon: Target,
     highlightType: null,
     freePlay: true,
   },
 ];
 
+// Step indicator component
+function StepIndicator({ currentStep, totalSteps, theme }) {
+  return (
+    <View style={styles.stepIndicator}>
+      {Array.from({ length: totalSteps }).map((_, index) => {
+        const isActive = index === currentStep;
+        const isComplete = index < currentStep;
+
+        return (
+          <View key={index} style={styles.stepDotContainer}>
+            <View
+              style={[
+                styles.stepDot,
+                {
+                  backgroundColor: isComplete
+                    ? theme.colors.success
+                    : isActive
+                      ? theme.colors.primary
+                      : theme.colors.textMuted + '40',
+                  width: isActive ? 24 : 8,
+                },
+              ]}
+            />
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+// Animated prompt card
+function PromptCard({ step, theme, isComplete }) {
+  const slideAnim = useRef(new Animated.Value(0)).current;
+  const IconComponent = isComplete ? CheckCircle2 : step.icon;
+
+  useEffect(() => {
+    slideAnim.setValue(0);
+    Animated.spring(slideAnim, {
+      toValue: 1,
+      friction: 8,
+      tension: 40,
+      useNativeDriver: true,
+    }).start();
+  }, [step]);
+
+  return (
+    <Animated.View
+      style={[
+        styles.promptCard,
+        {
+          backgroundColor: theme.colors.surface,
+          borderRadius: theme.borderRadius.xl,
+          transform: [
+            {
+              translateY: slideAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [20, 0],
+              }),
+            },
+          ],
+          opacity: slideAnim,
+        },
+      ]}
+    >
+      <View
+        style={[
+          styles.promptIconContainer,
+          {
+            backgroundColor: isComplete
+              ? theme.colors.success + '20'
+              : theme.colors.primary + '15',
+          },
+        ]}
+      >
+        <IconComponent
+          size={28}
+          color={isComplete ? theme.colors.success : theme.colors.primary}
+          strokeWidth={2}
+        />
+      </View>
+      <View style={styles.promptTextContainer}>
+        <Text style={[styles.promptTitle, { color: theme.colors.text }]}>
+          {isComplete ? 'Puzzle Complete!' : step.title}
+        </Text>
+        <Text style={[styles.promptDescription, { color: theme.colors.textMuted }]}>
+          {isComplete ? 'You\'ve mastered the basics' : step.prompt}
+        </Text>
+      </View>
+    </Animated.View>
+  );
+}
+
 export default function TutorialScreen({ navigation }) {
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
 
   const [step, setStep] = useState(0);
   const [numbers, setNumbers] = useState([...TUTORIAL_NUMBERS]);
@@ -50,21 +163,24 @@ export default function TutorialScreen({ navigation }) {
   const [history, setHistory] = useState([]);
   const [isComplete, setIsComplete] = useState(false);
 
+  // Animations
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const resultAnim = useRef(new Animated.Value(1)).current;
+  const celebrationAnim = useRef(new Animated.Value(0)).current;
+  const glowAnim = useRef(new Animated.Value(0)).current;
 
   // Pulse animation for highlighted elements
-  React.useEffect(() => {
+  useEffect(() => {
     const pulse = Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
-          toValue: 1.1,
-          duration: 500,
+          toValue: 1.08,
+          duration: 600,
           useNativeDriver: true,
         }),
         Animated.timing(pulseAnim, {
           toValue: 1,
-          duration: 500,
+          duration: 600,
           useNativeDriver: true,
         }),
       ])
@@ -73,24 +189,43 @@ export default function TutorialScreen({ navigation }) {
     return () => pulse.stop();
   }, [pulseAnim]);
 
-  const currentStep = STEPS[step] || STEPS[STEPS.length - 1];
+  // Glow animation
+  useEffect(() => {
+    const glow = Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(glowAnim, {
+          toValue: 0,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    glow.start();
+    return () => glow.stop();
+  }, [glowAnim]);
+
+  const currentStepData = STEPS[step] || STEPS[STEPS.length - 1];
 
   const handleNumberPress = (index) => {
     if (hiddenIndices.has(index)) return;
 
     if (step === 0 && selectedNumberIndex === null) {
-      // First step: select a number
       setSelectedNumberIndex(index);
       setStep(1);
-    } else if (step === 2 && selectedOperator !== null) {
-      // Third step: combine numbers
+    } else if (step === 2 && selectedOperator !== null && index !== selectedNumberIndex) {
+      // Must select a different number
       performCalculation(index);
       setStep(3);
-    } else if (currentStep.freePlay) {
-      // Free play mode
+    } else if (currentStepData.freePlay) {
       if (selectedNumberIndex === null) {
         setSelectedNumberIndex(index);
-      } else if (selectedOperator !== null) {
+      } else if (selectedOperator !== null && index !== selectedNumberIndex) {
+        // Must select a different number
         performCalculation(index);
       } else if (index === selectedNumberIndex) {
         setSelectedNumberIndex(null);
@@ -98,18 +233,15 @@ export default function TutorialScreen({ navigation }) {
         setSelectedNumberIndex(index);
       }
     } else if (index === selectedNumberIndex) {
-      // Deselect
       setSelectedNumberIndex(null);
     }
   };
 
   const handleOperatorPress = (operator) => {
     if (step === 1 && selectedNumberIndex !== null) {
-      // Second step: select operator
       setSelectedOperator(operator);
       setStep(2);
-    } else if (currentStep.freePlay && selectedNumberIndex !== null) {
-      // Free play mode
+    } else if (currentStepData.freePlay && selectedNumberIndex !== null) {
       if (selectedOperator === operator) {
         setSelectedOperator(null);
       } else {
@@ -146,7 +278,6 @@ export default function TutorialScreen({ navigation }) {
       return;
     }
 
-    // Save history
     setHistory([
       ...history,
       {
@@ -156,7 +287,6 @@ export default function TutorialScreen({ navigation }) {
       },
     ]);
 
-    // Update state
     const newNumbers = [...numbers];
     newNumbers[secondIndex] = result;
     setNumbers(newNumbers);
@@ -172,7 +302,7 @@ export default function TutorialScreen({ navigation }) {
     // Animate result
     Animated.sequence([
       Animated.timing(resultAnim, {
-        toValue: 1.2,
+        toValue: 1.15,
         duration: 100,
         useNativeDriver: true,
       }),
@@ -186,6 +316,12 @@ export default function TutorialScreen({ navigation }) {
     // Check win condition
     if (result === TARGET_NUMBER && newHidden.size === 3) {
       setIsComplete(true);
+      // Celebration animation
+      Animated.spring(celebrationAnim, {
+        toValue: 1,
+        friction: 4,
+        useNativeDriver: true,
+      }).start();
     }
   };
 
@@ -219,15 +355,15 @@ export default function TutorialScreen({ navigation }) {
   };
 
   const shouldHighlight = (type, identifier) => {
-    if (currentStep.freePlay || isComplete) return false;
+    if (currentStepData.freePlay || isComplete) return false;
 
-    if (type === 'number' && currentStep.highlightType === 'number') {
-      if (currentStep.highlightIndex === null) return true;
-      return currentStep.highlightIndex === identifier;
+    if (type === 'number' && currentStepData.highlightType === 'number') {
+      if (currentStepData.highlightIndex === null) return true;
+      return currentStepData.highlightIndex === identifier;
     }
 
-    if (type === 'operator' && currentStep.highlightType === 'operator') {
-      return currentStep.highlightValue === identifier;
+    if (type === 'operator' && currentStepData.highlightType === 'operator') {
+      return currentStepData.highlightValue === identifier;
     }
 
     return false;
@@ -235,58 +371,41 @@ export default function TutorialScreen({ navigation }) {
 
   return (
     <LinearGradient colors={theme.colors.background} style={styles.container}>
-      {/* Skip Button */}
-      {!isComplete && (
-        <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
-          <Text style={[styles.skipText, { color: theme.colors.textMuted }]}>
-            Skip
-          </Text>
-        </TouchableOpacity>
-      )}
-
-      {/* Tutorial Title */}
-      <View style={styles.titleContainer}>
-        <Text style={[styles.title, { color: theme.colors.text }]}>
-          How to Play
-        </Text>
-      </View>
-
-      {/* Prompt */}
-      <View
-        style={[
-          styles.promptContainer,
-          {
-            backgroundColor: theme.colors.surface,
-            borderRadius: theme.borderRadius.lg,
-          },
-        ]}
-      >
-        <Text style={[styles.promptText, { color: theme.colors.text }]}>
-          {isComplete ? 'You got it! Ready for real puzzles?' : currentStep.prompt}
-        </Text>
-      </View>
-
-      {/* Target Display */}
-      <View style={styles.targetContainer}>
-        <Text style={[styles.targetLabel, { color: theme.colors.textMuted }]}>
-          Make this number
-        </Text>
-        <View
-          style={[
-            styles.targetBox,
-            {
-              backgroundColor: theme.colors.surface,
-              borderRadius: theme.borderRadius.lg,
-            },
-          ]}
-        >
-          <Text style={[styles.targetNumber, { color: theme.colors.success }]}>
-            {TARGET_NUMBER}
+      {/* Header with Skip */}
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
+            How to Play
           </Text>
         </View>
+        {!isComplete && (
+          <TouchableOpacity
+            style={[styles.skipButton, { backgroundColor: theme.colors.surface }]}
+            onPress={handleSkip}
+          >
+            <Text style={[styles.skipText, { color: theme.colors.textMuted }]}>
+              Skip
+            </Text>
+            <ChevronRight size={16} color={theme.colors.textMuted} strokeWidth={2} />
+          </TouchableOpacity>
+        )}
       </View>
 
-      {/* Current Result */}
+      {/* Step Progress Indicator */}
+      <StepIndicator
+        currentStep={isComplete ? STEPS.length : step}
+        totalSteps={STEPS.length}
+        theme={theme}
+      />
+
+      {/* Prompt Card */}
+      <PromptCard
+        step={currentStepData}
+        theme={theme}
+        isComplete={isComplete}
+      />
+
+      {/* Result Display */}
       <TouchableOpacity
         style={styles.resultContainer}
         onPress={handleUndo}
@@ -298,13 +417,36 @@ export default function TutorialScreen({ navigation }) {
             styles.resultBox,
             {
               backgroundColor: theme.colors.surface,
-              borderRadius: theme.borderRadius.lg,
+              borderRadius: theme.borderRadius.xl,
               transform: [{ scale: resultAnim }],
-              borderWidth: currentResult === TARGET_NUMBER ? 2 : 0,
+              borderWidth: currentResult === TARGET_NUMBER ? 3 : 0,
               borderColor: theme.colors.success,
             },
           ]}
         >
+          {/* Animated glow ring when at 36 */}
+          {currentResult === TARGET_NUMBER && (
+            <Animated.View
+              style={[
+                styles.glowRing,
+                {
+                  borderColor: theme.colors.success,
+                  opacity: glowAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.2, 0.6],
+                  }),
+                  transform: [
+                    {
+                      scale: glowAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [1, 1.15],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            />
+          )}
           <Text
             style={[
               styles.resultNumber,
@@ -319,61 +461,123 @@ export default function TutorialScreen({ navigation }) {
             {currentResult !== null ? currentResult : '?'}
           </Text>
         </Animated.View>
+        {history.length > 0 && !isComplete && (
+          <Text style={[styles.undoHint, { color: theme.colors.textMuted }]}>
+            tap to undo
+          </Text>
+        )}
       </TouchableOpacity>
 
-      {/* Numbers */}
-      <View style={styles.numbersContainer}>
-        {numbers.map((num, index) => (
-          <Animated.View
-            key={index}
-            style={
-              shouldHighlight('number', index) && !hiddenIndices.has(index)
-                ? { transform: [{ scale: pulseAnim }] }
-                : undefined
-            }
-          >
-            <NumberCard
-              value={num}
-              onPress={() => handleNumberPress(index)}
-              selected={selectedNumberIndex === index}
-              hidden={hiddenIndices.has(index)}
-              disabled={isComplete}
-            />
-          </Animated.View>
-        ))}
-      </View>
+      {/* Game Board */}
+      <View
+        style={[
+          styles.gameBoard,
+          {
+            backgroundColor: theme.colors.surface + '30',
+            borderRadius: theme.borderRadius.xl,
+          },
+        ]}
+      >
+        {/* Numbers Grid */}
+        <View style={styles.numbersContainer}>
+          {numbers.map((num, index) => {
+            const isHighlighted = shouldHighlight('number', index) && !hiddenIndices.has(index);
+            return (
+              <View key={index} style={styles.cardWrapper}>
+                {isHighlighted && (
+                  <Animated.View
+                    style={[
+                      styles.highlightRing,
+                      {
+                        borderColor: theme.colors.primary,
+                        transform: [{ scale: pulseAnim }],
+                        opacity: pulseAnim.interpolate({
+                          inputRange: [1, 1.08],
+                          outputRange: [0.4, 0.8],
+                        }),
+                      },
+                    ]}
+                  />
+                )}
+                <Animated.View
+                  style={isHighlighted ? { transform: [{ scale: pulseAnim }] } : undefined}
+                >
+                  <NumberCard
+                    value={num}
+                    onPress={() => handleNumberPress(index)}
+                    selected={selectedNumberIndex === index}
+                    hidden={hiddenIndices.has(index)}
+                    disabled={isComplete}
+                  />
+                </Animated.View>
+              </View>
+            );
+          })}
+        </View>
 
-      {/* Operators */}
-      <View style={styles.operatorsContainer}>
-        {['+', '-', '*', '/'].map((op) => (
-          <Animated.View
-            key={op}
-            style={
-              shouldHighlight('operator', op)
-                ? { transform: [{ scale: pulseAnim }] }
-                : undefined
-            }
-          >
-            <OperatorButton
-              operator={op}
-              onPress={handleOperatorPress}
-              selected={selectedOperator === op}
-              disabled={selectedNumberIndex === null || isComplete}
-            />
-          </Animated.View>
-        ))}
+        {/* Operators */}
+        <View style={styles.operatorsContainer}>
+          {['+', '-', '*', '/'].map((op) => {
+            const isHighlighted = shouldHighlight('operator', op);
+            return (
+              <View key={op} style={styles.operatorWrapper}>
+                {isHighlighted && (
+                  <Animated.View
+                    style={[
+                      styles.highlightRingSmall,
+                      {
+                        borderColor: theme.colors.primary,
+                        transform: [{ scale: pulseAnim }],
+                        opacity: pulseAnim.interpolate({
+                          inputRange: [1, 1.08],
+                          outputRange: [0.4, 0.8],
+                        }),
+                      },
+                    ]}
+                  />
+                )}
+                <Animated.View
+                  style={isHighlighted ? { transform: [{ scale: pulseAnim }] } : undefined}
+                >
+                  <OperatorButton
+                    operator={op}
+                    onPress={handleOperatorPress}
+                    selected={selectedOperator === op}
+                    disabled={selectedNumberIndex === null || isComplete}
+                  />
+                </Animated.View>
+              </View>
+            );
+          })}
+        </View>
       </View>
 
       {/* Complete Button */}
       {isComplete && (
-        <View style={styles.completeContainer}>
+        <Animated.View
+          style={[
+            styles.completeContainer,
+            {
+              transform: [{ scale: celebrationAnim }],
+              opacity: celebrationAnim,
+            },
+          ]}
+        >
+          <View style={styles.celebrationRow}>
+            <Sparkles size={24} color={theme.colors.primary} strokeWidth={2} />
+            <Text style={[styles.celebrationText, { color: theme.colors.text }]}>
+              You're ready!
+            </Text>
+            <Sparkles size={24} color={theme.colors.primary} strokeWidth={2} />
+          </View>
           <Button
             title="Start Playing"
             onPress={handleComplete}
             variant="primary"
             size="large"
+            fullWidth
           />
-        </View>
+        </Animated.View>
       )}
     </LinearGradient>
   );
@@ -384,77 +588,154 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 60,
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    marginBottom: 20,
+  },
+  headerLeft: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+  },
   skipButton: {
-    position: 'absolute',
-    top: 60,
-    right: 24,
-    zIndex: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
   },
   skipText: {
-    fontSize: 16,
+    fontSize: 15,
+    fontWeight: '600',
+    marginRight: 2,
   },
-  titleContainer: {
+  stepIndicator: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
+    gap: 8,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+  stepDotContainer: {
+    alignItems: 'center',
   },
-  promptContainer: {
+  stepDot: {
+    height: 8,
+    borderRadius: 4,
+  },
+  promptCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginHorizontal: 24,
-    padding: 16,
+    padding: 20,
     marginBottom: 24,
+  },
+  promptIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 16,
   },
-  promptText: {
-    fontSize: 18,
-    textAlign: 'center',
+  promptTextContainer: {
+    flex: 1,
   },
-  targetContainer: {
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  targetLabel: {
-    fontSize: 14,
+  promptTitle: {
+    fontSize: 20,
+    fontWeight: '700',
     marginBottom: 4,
   },
-  targetBox: {
-    paddingHorizontal: 24,
-    paddingVertical: 8,
-  },
-  targetNumber: {
-    fontSize: 32,
-    fontWeight: 'bold',
+  promptDescription: {
+    fontSize: 15,
+    lineHeight: 20,
   },
   resultContainer: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   resultBox: {
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    minWidth: 120,
+    paddingHorizontal: 40,
+    paddingVertical: 20,
+    minWidth: 140,
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  glowRing: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    borderRadius: 24,
+    borderWidth: 3,
   },
   resultNumber: {
-    fontSize: 48,
-    fontWeight: 'bold',
+    fontSize: 52,
+    fontWeight: '800',
+  },
+  undoHint: {
+    fontSize: 13,
+    fontWeight: '500',
+    marginTop: 10,
+    opacity: 0.7,
+  },
+  gameBoard: {
+    marginHorizontal: 16,
+    paddingVertical: 24,
+    paddingHorizontal: 8,
   },
   numbersContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     flexWrap: 'wrap',
-    paddingHorizontal: 16,
-    marginBottom: 24,
+    marginBottom: 20,
+  },
+  cardWrapper: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  highlightRing: {
+    position: 'absolute',
+    width: 88,
+    height: 88,
+    borderRadius: 20,
+    borderWidth: 3,
   },
   operatorsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 32,
+  },
+  operatorWrapper: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  highlightRingSmall: {
+    position: 'absolute',
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    borderWidth: 3,
   },
   completeContainer: {
-    paddingHorizontal: 48,
-    marginTop: 16,
+    paddingHorizontal: 32,
+    marginTop: 20,
+  },
+  celebrationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    gap: 12,
+  },
+  celebrationText: {
+    fontSize: 22,
+    fontWeight: '700',
   },
 });

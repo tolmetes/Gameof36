@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
+import { ChevronLeft, Lock } from 'lucide-react-native';
 import { useTheme } from '../themes/ThemeContext';
 import { getProgress } from '../data/storage';
 import { DIFFICULTIES } from '../logic/difficultyConfig';
@@ -58,9 +59,7 @@ function LevelButton({ level, stars, isUnlocked, onPress, theme, accentColor }) 
         </View>
       )}
       {!isUnlocked && (
-        <Text style={[styles.lockIcon, { color: theme.colors.textMuted }]}>
-          &#x1F512;
-        </Text>
+        <Lock size={18} color={theme.colors.textMuted} strokeWidth={2.5} />
       )}
     </TouchableOpacity>
   );
@@ -131,9 +130,7 @@ export default function LevelSelectScreen({ navigation, route }) {
           style={[styles.backButton, { backgroundColor: theme.colors.surface }]}
           onPress={() => navigation.goBack()}
         >
-          <Text style={[styles.backIcon, { color: theme.colors.text }]}>
-            &#x2190;
-          </Text>
+          <ChevronLeft size={22} color={theme.colors.text} strokeWidth={2.5} />
         </TouchableOpacity>
         <View style={styles.titleContainer}>
           <Text style={[styles.title, { color: accentColor }]}>
@@ -174,9 +171,6 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  backIcon: {
-    fontSize: 24,
   },
   titleContainer: {
     alignItems: 'center',

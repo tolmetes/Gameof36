@@ -8,6 +8,7 @@ import {
   Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { ChevronLeft, Home, RotateCcw, Flame, Undo2 } from 'lucide-react-native';
 import { useTheme } from '../themes/ThemeContext';
 import { NumberCard, OperatorButton } from '../components';
 import { generatePuzzle } from '../logic/puzzleGenerator';
@@ -69,7 +70,8 @@ export default function EndlessScreen({ navigation }) {
 
     if (selectedNumberIndex === null) {
       setSelectedNumberIndex(index);
-    } else if (selectedOperator !== null) {
+    } else if (selectedOperator !== null && index !== selectedNumberIndex) {
+      // Must select a different number for the second operand
       const firstNum = numbers[selectedNumberIndex];
       const secondNum = numbers[index];
       let result;
@@ -234,9 +236,7 @@ export default function EndlessScreen({ navigation }) {
           style={[styles.backButton, { backgroundColor: theme.colors.surface }]}
           onPress={() => navigation.goBack()}
         >
-          <Text style={[styles.backIcon, { color: theme.colors.text }]}>
-            &#x2190;
-          </Text>
+          <ChevronLeft size={22} color={theme.colors.text} strokeWidth={2.5} />
         </TouchableOpacity>
         <View style={styles.titleContainer}>
           <Text style={[styles.title, { color: theme.colors.text }]}>
@@ -247,45 +247,6 @@ export default function EndlessScreen({ navigation }) {
           </Text>
         </View>
         <View style={styles.placeholder} />
-      </View>
-
-      {/* Streak Display */}
-      <Animated.View
-        style={[
-          styles.streakContainer,
-          {
-            backgroundColor: theme.colors.surface,
-            borderRadius: theme.borderRadius.lg,
-            transform: [{ scale: streakAnim }],
-          },
-        ]}
-      >
-        <Text style={[styles.streakIcon, { color: theme.colors.secondary }]}>
-          &#x1F525;
-        </Text>
-        <Text style={[styles.streakNumber, { color: theme.colors.text }]}>
-          {streak}
-        </Text>
-        <Text style={[styles.streakLabel, { color: theme.colors.textMuted }]}>
-          streak
-        </Text>
-      </Animated.View>
-
-      {/* Target Display */}
-      <View style={styles.targetContainer}>
-        <View
-          style={[
-            styles.targetBox,
-            {
-              backgroundColor: theme.colors.surface,
-              borderRadius: theme.borderRadius.lg,
-            },
-          ]}
-        >
-          <Text style={[styles.targetNumber, { color: theme.colors.success }]}>
-            {TARGET_NUMBER}
-          </Text>
-        </View>
       </View>
 
       {/* Current Result */}
@@ -365,26 +326,91 @@ export default function EndlessScreen({ navigation }) {
           style={[styles.actionButton, { backgroundColor: theme.colors.surface }]}
           onPress={handleHome}
         >
-          <Text style={[styles.actionIcon, { color: theme.colors.textMuted }]}>
-            &#x1F3E0;
-          </Text>
+          <Home size={24} color={theme.colors.textMuted} strokeWidth={2} />
           <Text style={[styles.actionLabel, { color: theme.colors.textMuted }]}>
             Home
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: theme.colors.surface }]}
-          onPress={handleReset}
+          style={[
+            styles.actionButton,
+            {
+              backgroundColor: history.length > 0
+                ? theme.colors.primary + '15'
+                : theme.colors.surface,
+            },
+          ]}
+          onPress={handleUndo}
+          disabled={history.length === 0}
         >
-          <Text style={[styles.actionIcon, { color: theme.colors.error }]}>
-            &#x21BB;
+          <Undo2
+            size={24}
+            color={history.length > 0 ? theme.colors.primary : theme.colors.textMuted + '50'}
+            strokeWidth={2}
+          />
+          <Text
+            style={[
+              styles.actionLabel,
+              { color: history.length > 0 ? theme.colors.primary : theme.colors.textMuted + '50' },
+            ]}
+          >
+            Undo
           </Text>
-          <Text style={[styles.actionLabel, { color: theme.colors.textMuted }]}>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.actionButton,
+            {
+              backgroundColor: history.length > 0
+                ? theme.colors.error + '15'
+                : theme.colors.surface,
+            },
+          ]}
+          onPress={handleReset}
+          disabled={history.length === 0}
+        >
+          <RotateCcw
+            size={24}
+            color={history.length > 0 ? theme.colors.error : theme.colors.textMuted + '50'}
+            strokeWidth={2}
+          />
+          <Text
+            style={[
+              styles.actionLabel,
+              { color: history.length > 0 ? theme.colors.error : theme.colors.textMuted + '50' },
+            ]}
+          >
             Reset
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Streak Display */}
+      <Animated.View
+        style={[
+          styles.streakContainer,
+          {
+            backgroundColor: theme.colors.surface,
+            borderRadius: theme.borderRadius.lg,
+            transform: [{ scale: streakAnim }],
+          },
+        ]}
+      >
+        <Flame
+          size={24}
+          color={theme.colors.secondary}
+          strokeWidth={2}
+          fill={streak > 0 ? theme.colors.secondary : 'transparent'}
+        />
+        <Text style={[styles.streakNumber, { color: theme.colors.text }]}>
+          {streak}
+        </Text>
+        <Text style={[styles.streakLabel, { color: theme.colors.textMuted }]}>
+          streak
+        </Text>
+      </Animated.View>
 
       {/* Win Overlay */}
       {isWin && (
@@ -417,9 +443,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  backIcon: {
-    fontSize: 24,
-  },
   titleContainer: {
     alignItems: 'center',
   },
@@ -439,11 +462,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     paddingHorizontal: 20,
     paddingVertical: 12,
-    marginBottom: 16,
-  },
-  streakIcon: {
-    fontSize: 24,
-    marginRight: 8,
+    marginTop: 24,
   },
   streakNumber: {
     fontSize: 28,
@@ -452,18 +471,6 @@ const styles = StyleSheet.create({
   },
   streakLabel: {
     fontSize: 16,
-  },
-  targetContainer: {
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  targetBox: {
-    paddingHorizontal: 24,
-    paddingVertical: 8,
-  },
-  targetNumber: {
-    fontSize: 32,
-    fontWeight: 'bold',
   },
   resultContainer: {
     alignItems: 'center',
@@ -506,10 +513,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     minWidth: 80,
-  },
-  actionIcon: {
-    fontSize: 24,
-    marginBottom: 4,
   },
   actionLabel: {
     fontSize: 12,

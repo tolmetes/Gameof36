@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
+import { Settings, Target, Infinity, BarChart3 } from 'lucide-react-native';
 import { useTheme } from '../themes/ThemeContext';
 import { getProgress, getStreaks } from '../data/storage';
 
@@ -71,7 +72,7 @@ function MenuCard({ title, subtitle, icon, progress, color, onPress, theme, inde
           <View style={styles.cardMain}>
             {/* Icon container with background */}
             <View style={[styles.iconContainer, { backgroundColor: color + '15' }]}>
-              <Text style={[styles.cardIcon, { color }]}>{icon}</Text>
+              {icon}
             </View>
 
             <View style={styles.cardText}>
@@ -144,12 +145,13 @@ export default function HomeScreen({ navigation }) {
   return (
     <LinearGradient colors={theme.colors.background} style={styles.container}>
       <View style={styles.header}>
+        <View style={styles.headerSpacer} />
         <View style={styles.logoContainer}>
           <Text style={[styles.logoText, { color: theme.colors.text }]}>
-            GAME OF
-          </Text>
-          <Text style={[styles.logoNumber, { color: theme.colors.primary }]}>
-            36
+            GAME OF{' '}
+            <Text style={[styles.logoNumber, { color: theme.colors.primary }]}>
+              36
+            </Text>
           </Text>
         </View>
         <TouchableOpacity
@@ -159,9 +161,7 @@ export default function HomeScreen({ navigation }) {
           ]}
           onPress={() => navigation.navigate('Settings')}
         >
-          <Text style={[styles.settingsIcon, { color: theme.colors.textMuted }]}>
-            &#x2699;
-          </Text>
+          <Settings size={22} color={theme.colors.textMuted} strokeWidth={2} />
         </TouchableOpacity>
       </View>
 
@@ -177,7 +177,7 @@ export default function HomeScreen({ navigation }) {
         <MenuCard
           title="Campaign"
           subtitle="55 puzzles across 3 worlds"
-          icon="&#x1F3AF;"
+          icon={<Target size={28} color={theme.colors.easy} strokeWidth={2} />}
           progress={campaignProgress}
           color={theme.colors.easy}
           onPress={() => navigation.navigate('Campaign')}
@@ -188,7 +188,7 @@ export default function HomeScreen({ navigation }) {
         <MenuCard
           title="Endless"
           subtitle="Test your skills, no limits"
-          icon="&#x221E;"
+          icon={<Infinity size={28} color={theme.colors.secondary} strokeWidth={2.5} />}
           progress={streak > 0 ? `${streak} day streak` : 'Start playing'}
           color={theme.colors.secondary}
           onPress={() => navigation.navigate('Endless')}
@@ -204,7 +204,7 @@ export default function HomeScreen({ navigation }) {
         <MenuCard
           title="Statistics"
           subtitle="Track your achievements"
-          icon="&#x1F4CA;"
+          icon={<BarChart3 size={28} color={theme.colors.medium} strokeWidth={2} />}
           progress={`${totalStars} ★`}
           color={theme.colors.medium}
           onPress={() => navigation.navigate('Stats')}
@@ -224,24 +224,26 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     paddingHorizontal: 24,
     marginBottom: 40,
   },
+  headerSpacer: {
+    width: 48,
+  },
   logoContainer: {
-    alignItems: 'flex-start',
+    flex: 1,
+    alignItems: 'center',
   },
   logoText: {
-    fontSize: 14,
-    fontWeight: '500',
-    letterSpacing: 6,
-    opacity: 0.7,
+    fontSize: 28,
+    fontWeight: '700',
+    letterSpacing: 4,
   },
   logoNumber: {
-    fontSize: 56,
+    fontSize: 28,
     fontWeight: '800',
-    marginTop: -4,
-    letterSpacing: -2,
+    letterSpacing: -1,
   },
   settingsButton: {
     width: 48,
@@ -249,9 +251,6 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  settingsIcon: {
-    fontSize: 22,
   },
   menuContainer: {
     paddingHorizontal: 20,

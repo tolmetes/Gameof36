@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
+import { ChevronLeft, Lock } from 'lucide-react-native';
 import { useTheme } from '../themes/ThemeContext';
 import { getProgress, isWorldUnlocked } from '../data/storage';
 import { DIFFICULTIES } from '../logic/difficultyConfig';
@@ -90,9 +91,7 @@ function WorldCard({ difficulty, progress, stars, isLocked, onPress, theme, inde
 
             {isLocked ? (
               <View style={[styles.lockBadge, { backgroundColor: theme.colors.textMuted + '20' }]}>
-                <Text style={[styles.lockIcon, { color: theme.colors.textMuted }]}>
-                  &#x1F512;
-                </Text>
+                <Lock size={16} color={theme.colors.textMuted} strokeWidth={2.5} />
               </View>
             ) : (
               <View style={styles.percentBadge}>
@@ -186,9 +185,7 @@ export default function CampaignScreen({ navigation }) {
           style={[styles.backButton, { backgroundColor: theme.colors.surface }]}
           onPress={() => navigation.goBack()}
         >
-          <Text style={[styles.backIcon, { color: theme.colors.text }]}>
-            &#x2190;
-          </Text>
+          <ChevronLeft size={22} color={theme.colors.text} strokeWidth={2.5} />
         </TouchableOpacity>
         <Text style={[styles.title, { color: theme.colors.text }]}>
           Campaign
@@ -237,9 +234,6 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  backIcon: {
-    fontSize: 22,
   },
   title: {
     fontSize: 22,

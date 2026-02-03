@@ -8,6 +8,7 @@ import {
   Switch,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useTheme } from '../themes/ThemeContext';
 import { getSettings, updateSettings } from '../data/storage';
 
@@ -68,9 +69,7 @@ function SettingButton({ title, subtitle, onPress, theme }) {
           </Text>
         )}
       </View>
-      <Text style={[styles.chevron, { color: theme.colors.textMuted }]}>
-        &#x203A;
-      </Text>
+      <ChevronRight size={20} color={theme.colors.textMuted} strokeWidth={2} />
     </TouchableOpacity>
   );
 }
@@ -116,9 +115,7 @@ export default function SettingsScreen({ navigation }) {
           style={[styles.backButton, { backgroundColor: theme.colors.surface }]}
           onPress={() => navigation.goBack()}
         >
-          <Text style={[styles.backIcon, { color: theme.colors.text }]}>
-            &#x2190;
-          </Text>
+          <ChevronLeft size={22} color={theme.colors.text} strokeWidth={2.5} />
         </TouchableOpacity>
         <Text style={[styles.title, { color: theme.colors.text }]}>
           Settings
@@ -213,9 +210,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  backIcon: {
-    fontSize: 24,
-  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -252,9 +246,6 @@ const styles = StyleSheet.create({
   settingSubtitle: {
     fontSize: 14,
     marginTop: 2,
-  },
-  chevron: {
-    fontSize: 24,
   },
   aboutCard: {
     padding: 20,

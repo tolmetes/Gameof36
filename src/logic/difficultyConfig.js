@@ -3,7 +3,7 @@ export const DIFFICULTIES = {
   easy: {
     name: 'Easy',
     operators: ['+', '-'],
-    numberRange: { min: 1, max: 12 },
+    numberRange: { min: 2, max: 15 },
     allowMultipleSolutions: true,
     color: 'easy',
     totalLevels: 20,
@@ -12,7 +12,7 @@ export const DIFFICULTIES = {
   medium: {
     name: 'Medium',
     operators: ['+', '-', '*'],
-    numberRange: { min: 1, max: 15 },
+    numberRange: { min: 3, max: 18 },
     allowMultipleSolutions: true, // 2-3 paths
     color: 'medium',
     totalLevels: 20,
@@ -21,7 +21,7 @@ export const DIFFICULTIES = {
   hard: {
     name: 'Hard',
     operators: ['+', '-', '*', '/'],
-    numberRange: { min: 1, max: 20 },
+    numberRange: { min: 4, max: 25 },
     allowMultipleSolutions: false, // Single path
     color: 'hard',
     totalLevels: 15,
@@ -32,14 +32,14 @@ export const DIFFICULTIES = {
 export const STAR_THRESHOLDS = {
   // Time thresholds in seconds
   twoStar: {
-    easy: 30,
-    medium: 45,
-    hard: 60,
+    easy: 20,
+    medium: 35,
+    hard: 50,
   },
   threeStar: {
-    easy: 15,
-    medium: 25,
-    hard: 40,
+    easy: 10,
+    medium: 18,
+    hard: 30,
   },
 };
 

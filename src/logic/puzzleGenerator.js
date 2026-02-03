@@ -143,22 +143,22 @@ function shuffleArray(array) {
   return shuffled;
 }
 
-// Fallback puzzles for each difficulty
+// Fallback puzzles for each difficulty - designed to be challenging
 const FALLBACK_PUZZLES = {
   easy: [
-    { numbers: [9, 9, 9, 9], optimalMoves: 3 }, // 9+9+9+9 = 36
-    { numbers: [6, 6, 12, 12], optimalMoves: 3 }, // 12+12+6+6 = 36
-    { numbers: [10, 10, 8, 8], optimalMoves: 3 }, // 10+10+8+8 = 36
+    { numbers: [13, 9, 8, 6], optimalMoves: 3 },   // 13+9+8+6 = 36
+    { numbers: [32, 11, 4, 3], optimalMoves: 3 },  // 32+11-4-3 = 36
+    { numbers: [47, 6, 3, 2], optimalMoves: 3 },   // 47-6-3-2 = 36
   ],
   medium: [
-    { numbers: [2, 3, 4, 6], optimalMoves: 3 }, // (2+4)*6 = 36 or 2*3*6 = 36
-    { numbers: [3, 3, 4, 4], optimalMoves: 3 }, // (3+3)*(4+4)/2... many solutions
-    { numbers: [2, 2, 9, 9], optimalMoves: 3 }, // 2*9+2*9 = 36
+    { numbers: [14, 5, 4, 3], optimalMoves: 3 },   // (14-5)*4 = 36
+    { numbers: [12, 5, 3, 2], optimalMoves: 3 },   // 12*(5-2) = 36
+    { numbers: [8, 6, 3, 4], optimalMoves: 3 },    // (6+3)*4 = 36
   ],
   hard: [
-    { numbers: [1, 5, 7, 9], optimalMoves: 3 }, // (1+5)*(9-7+1)... tricky
-    { numbers: [2, 3, 6, 8], optimalMoves: 3 }, // 8/(2-6/3) or (8-2)*6
-    { numbers: [1, 4, 6, 9], optimalMoves: 3 }, // 4*(9-1)+6/6... requires thought
+    { numbers: [48, 8, 6, 2], optimalMoves: 3 },   // 48/8*6 = 36
+    { numbers: [15, 9, 6, 3], optimalMoves: 3 },   // (15-9)*6 = 36
+    { numbers: [4, 5, 6, 12], optimalMoves: 3 },   // 12+6*4 = 36
   ],
 };
 

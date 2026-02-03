@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Flame, Trophy, Zap } from 'lucide-react-native';
 import { useTheme } from '../themes/ThemeContext';
 import { Button, StarRating } from '../components';
 import { getStarMessage } from '../logic/starCalculator';
@@ -189,7 +190,12 @@ export default function ResultScreen({ navigation, route }) {
             },
           ]}
         >
-          <Text style={[styles.streakIcon]}>🔥</Text>
+          <Flame
+            size={22}
+            color={theme.colors.secondary}
+            strokeWidth={2}
+            fill={theme.colors.secondary}
+          />
           <Text style={[styles.streakText, { color: theme.colors.secondary }]}>
             {streak} in a row!
           </Text>
@@ -312,10 +318,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 24,
-  },
-  streakIcon: {
-    fontSize: 20,
-    marginRight: 8,
+    gap: 10,
   },
   streakText: {
     fontSize: 16,
