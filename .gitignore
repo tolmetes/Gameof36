@@ -1,5 +1,6 @@
 node_modules/
 .expo/
+dist/
 npm-debug.*
 *.jks
 *.p8
@@ -14,3 +15,14 @@ web-build/
 
 # Worktrees
 .worktrees/
+
+# Windows reserved names
+nul
+
+# AI assistant configs (local/user-specific)
+.agent/
+.agents/
+.claude/
+.codex/
+.gemini/
+.github/skills/
